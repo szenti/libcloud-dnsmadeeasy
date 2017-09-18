@@ -2,3 +2,6 @@
 *.sublime-*
 *.egg
 *.egg-info
+.idea/
+.eggs/
+*/__pycache__/
