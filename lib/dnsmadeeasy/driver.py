@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see <http://www.gnu.org/licenses/>.
 
+import copy
 import json
 import re
 import requests
@@ -323,7 +324,7 @@ class DNSMadeEasyDNSDriver(DNSDriver):
                 raise
 
     def update_record(self, record: Record, name, type, data, extra=None):
-        new_record = extra or {}
+        new_record = copy.deepcopy(extra) or {}
         record_ttl = record.extra.get('ttl', DEFAULT_TTL)
 
         new_record.update({
