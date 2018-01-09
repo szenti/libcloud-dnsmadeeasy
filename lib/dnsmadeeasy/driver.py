@@ -23,8 +23,9 @@ from libcloud.dns.base import DNSDriver, Record, Zone
 from libcloud.dns.providers import set_driver
 from libcloud.dns.types import RecordType, ZoneAlreadyExistsError, \
     ZoneDoesNotExistError, RecordAlreadyExistsError, RecordDoesNotExistError
-
 from .api import DNSMadeEasyAPI
+
+DEFAULT_TTL = 3600
 
 
 class DNSMadeEasyRateLimitExceededError(LibcloudError):
@@ -267,7 +268,7 @@ class DNSMadeEasyDNSDriver(DNSDriver):
         if not extra:
             extra = {}
         if 'ttl' not in extra:
-            extra['ttl'] = 3600
+            extra['ttl'] = DEFAULT_TTL
         if type == 'MX' and 'mxLevel' not in extra:
             if 'priority' in extra:
                 extra['mxLevel'] = extra['priority']
@@ -320,6 +321,24 @@ class DNSMadeEasyDNSDriver(DNSDriver):
                     value = record, driver = self, record_id = record.id)
             else:
                 raise
+
+    def update_record(self, record: Record, name, type, data, extra=None):
+        new_record = extra or {}
+        record_ttl = record.ttl or DEFAULT_TTL
+
+        new_record.update({
+            'name': name or record.name,
+            'type': type or record.type,
+            'value': data or record.data,
+            'id': record.id,
+            'ttl': extra.get('ttl', record_ttl)
+        })
+
+        response = self._api.dns.managed(record.zone.id).records(record.id).PUT(
+            data=json.dumps(new_record), headers={'Content-Type': 'application/json'})
+        self._raise_for_response(response)
+
+        return self._to_record(new_record, record.zone)
 
 
 set_driver('dnsmadeeasy', __name__, DNSMadeEasyDNSDriver.__name__)
