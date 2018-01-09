@@ -331,7 +331,7 @@ class DNSMadeEasyDNSDriver(DNSDriver):
             'type': type or record.type,
             'value': data or record.data,
             'id': record.id,
-            'ttl': extra.get('ttl', record_ttl)
+            'ttl': new_record.get('ttl', record_ttl)
         })
 
         response = self._api.dns.managed(record.zone.id).records(record.id).PUT(
