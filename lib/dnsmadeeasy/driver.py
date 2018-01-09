@@ -324,7 +324,7 @@ class DNSMadeEasyDNSDriver(DNSDriver):
 
     def update_record(self, record: Record, name, type, data, extra=None):
         new_record = extra or {}
-        record_ttl = record.ttl or DEFAULT_TTL
+        record_ttl = record.extra.get('ttl', DEFAULT_TTL)
 
         new_record.update({
             'name': name or record.name,
